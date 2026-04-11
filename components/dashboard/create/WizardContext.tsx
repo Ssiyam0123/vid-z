@@ -7,7 +7,11 @@ export interface SeriesCreationData {
   customNiche: string;
   language: string;
   voiceId?: string;
-  // Add future fields here
+  backgroundMusic?: string;
+  videoStyle?: string;
+  captionStyle?: string;
+  seriesTitle?: string;
+  seriesDescription?: string;
 }
 
 interface WizardContextType {
@@ -21,6 +25,7 @@ interface WizardContextType {
   nextStep: () => void;
   prevStep: () => void;
   setCurrentStep: (step: number) => void;
+  submitSeries: () => Promise<void>;
 }
 
 const WizardContext = createContext<WizardContextType | undefined>(undefined);
@@ -34,7 +39,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
     language: "English",
   });
 
-  const totalSteps = 4;
+  const totalSteps = 6;
 
   const updateData = (newData: Partial<SeriesCreationData>) => {
     setData((prev) => ({ ...prev, ...newData }));
@@ -54,6 +59,25 @@ export function WizardProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const submitSeries = async () => {
+    let url = "/api/series";
+    let method = "POST";
+    
+    if (typeof window !== 'undefined' && window.location.pathname.includes('/edit')) {
+      const id = window.location.pathname.split('/').slice(-2, -1)[0];
+      url = `/api/series/${id}`;
+      method = "PUT";
+    }
+
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error("Failed to save series");
+    return response.json();
+  };
+
   return (
     <WizardContext.Provider
       value={{
@@ -66,6 +90,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         nextStep,
         prevStep,
         setCurrentStep,
+        submitSeries,
       }}
     >
       {children}

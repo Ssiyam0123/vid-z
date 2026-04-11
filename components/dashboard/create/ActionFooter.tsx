@@ -14,6 +14,8 @@ export function ActionFooter() {
     prevStep 
   } = useWizard();
 
+  if (currentStep === totalSteps) return null;
+
   return (
     <footer className="fixed bottom-0 left-0 right-0 lg:left-80 z-20 bg-background/80 backdrop-blur-md border-t border-border p-4 transition-all duration-300">
       <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
